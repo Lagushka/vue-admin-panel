@@ -8,7 +8,11 @@
           <img src="./assets/refresh.svg" alt="" width="35" @click="getOrders()">
         </button>
         <ul class="list">
-          <li class="order" v-for="order in orders" :key="order.id">
+          <li 
+            class="order" 
+            v-for="order in orders" 
+            :key="order.id" 
+          >
             <Order 
               :element="order" 
               :delivery="false" 
@@ -16,11 +20,13 @@
               @showInfo="showMore"
               @toDelivery="orderToDelivery" 
               @removeElement="deleteElement"
+              draggable="true"
+              @dragstart="event => dragOrder(event, order.id)"
             />
           </li>
         </ul>
       </div>
-      <div class="deliveries">
+      <div class="deliveries" @dragover="event => event.preventDefault()" @drop="dropOrder">
         <h2>Отгрузки</h2>
         <button class="refresher">
           <img src="./assets/refresh.svg" alt="" width="35" @click="getDeliveries()">
@@ -38,7 +44,14 @@
       </div>
     </main>
     <PageFooter />
-    <ModalWindow :element="element" v-if="openModal" @click="openModal = false" @closeModal="openModal = false" @toDelivery="orderToDelivery" @delete="deleteElement" />
+    <ModalWindow 
+      :element="element" 
+      v-if="openModal" 
+      @click="openModal = false" 
+      @closeModal="openModal = false" 
+      @toDelivery="orderToDelivery" 
+      @delete="deleteElement" 
+    />
   </div>
 </template>
 
@@ -90,7 +103,6 @@ export default {
     removeMenus(element) {
       if (element) {
         if (element.order) {
-          console.log('hello');
           for (const order of this.orders) {
             order['menuVisibility'] = false;
           }
@@ -179,6 +191,19 @@ export default {
       this.getOrders();
       this.getDeliveries();
     },
+
+    dragOrder(event, id) {
+      event.dataTransfer.setData('order', id);
+    },
+
+    dropOrder(event) {
+      const id = event.dataTransfer.getData('order');
+      for (const order of this.orders) {
+        if (order.id == id) {
+          this.orderToDelivery(order);
+        }
+      }
+    }
   },
   mounted() {
     this.getOrders();
