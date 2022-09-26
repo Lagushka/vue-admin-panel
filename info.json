@@ -1,55 +1,56 @@
 {
-    "orders": [
+  "orders": [
+    {
+      "id": 123,
+      "cost": 12345,
+      "products": [
         {
-            "id": 123,
-            "cost": 12345.00,
-            "products": [
-                {
-                    "name": "Товар первый",
-                    "number": 1,
-                    "price": 12123.00
-                },
-                {
-                    "name": "Товар второй",
-                    "number": 3,
-                    "price": 22123.00
-                }
-            ]
+          "name": "Товар первый",
+          "number": 1,
+          "price": 12123
         },
         {
-            "id": 124,
-            "cost": 12345.00,
-            "products": [
-                {
-                    "name": "Товар первый",
-                    "number": 1,
-                    "price": 12123.00
-                },
-                {
-                    "name": "Товар второй",
-                    "number": 3,
-                    "price": 22123.00
-                }
-            ]
+          "name": "Товар второй",
+          "number": 3,
+          "price": 22123
         }
-    ],
-    "deliveries": [
+      ]
+    },
+    {
+      "id": 124,
+      "cost": 12345,
+      "products": [
         {
-            "id": 123,
-            "cost": 12345.00,
-            "order": 123,
-            "products": [
-                {
-                    "name": "Товар первый",
-                    "number": 1,
-                    "price": 12123.00
-                },
-                {
-                    "name": "Товар второй",
-                    "number": 3,
-                    "price": 22123.00
-                }
-            ]
+          "name": "Товар первый",
+          "number": 1,
+          "price": 12123
+        },
+        {
+          "name": "Товар второй",
+          "number": 3,
+          "price": 22123
         }
-    ]
+      ]
+    }
+  ],
+  "deliveries": [
+    {
+      "id": 123,
+      "cost": 12345,
+      "order": 123,
+      "date": "10.06.2022",
+      "products": [
+        {
+          "name": "Товар первый",
+          "number": 1,
+          "price": 12123
+        },
+        {
+          "name": "Товар второй",
+          "number": 3,
+          "price": 22123
+        }
+      ]
+    }
+  ]
 }

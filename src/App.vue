@@ -1,24 +1,43 @@
 <template>
-  <div id="app" :class="{ 'dark-theme': darkTheme }">
-    <PageHeader @changeTheme="(theme) => (darkTheme = theme)" />
+  <div id="app" @click="removeMenus">
+    <PageHeader />
     <main>
       <div class="orders">
         <h2>Заказы</h2>
+        <button class="refresher">        
+          <img src="./assets/refresh.svg" alt="" width="35" @click="getOrders()">
+        </button>
         <ul class="list">
           <li class="order" v-for="order in orders" :key="order.id">
-            <Order :id ="'Заказ #'+order.id" :cost = "order.cost.toLocaleString('en')" />
+            <Order 
+              :element="order" 
+              :delivery="false" 
+              @changeVisibility="order.menuVisibility = !order.menuVisibility" 
+              @showInfo="showMore"
+              @toDelivery="orderToDelivery" 
+              @removeElement="deleteElement"
+            />
           </li>
         </ul>
       </div>
       <div class="deliveries">
         <h2>Отгрузки</h2>
+        <button class="refresher">
+          <img src="./assets/refresh.svg" alt="" width="35" @click="getDeliveries()">
+        </button>
         <ul class="list">
           <li class="delivery" v-for="delivery in deliveries" :key="delivery.id">
-            <Order :id ="'Отгрузка #'+delivery.id" :cost = "delivery.cost.toLocaleString('en')" />
+            <Order 
+              :element="delivery" 
+              :delivery="true"
+              @changeVisibility="delivery.menuVisibility = !delivery.menuVisibility"
+              @removeElement="deleteElement"
+            />
           </li>
         </ul>
       </div>
     </main>
+    <ModalWindow :element="element" v-if="openModal" @click="openModal = false" @closeModal="openModal = false" @toDelivery="orderToDelivery" @delete="deleteElement" />
   </div>
 </template>
 
@@ -26,34 +45,167 @@
 import PageHeader from "./components/PageHeader.vue";
 import Order from "./components/OrderBrief.vue";
 import axios from 'axios';
+import ModalWindow from './components/ModalWindow.vue';
 
 export default {
   data() {
     return {
-      darkTheme: false,
       orders: [],
       deliveries: [],
+      openModal: false,
+      element: {},
     };
   },
   components: {
     PageHeader,
     Order,
-  },
+    ModalWindow
+},
   methods: {
-    async getData() {
-      const ordersList = await axios.get('http://localhost:3000/orders');
-      this.orders = ordersList.data;
-      const deliveriesList = await axios.get('http://localhost:3000/deliveries');
-      this.deliveries = deliveriesList.data;
-    }
+    async getOrders() {
+      axios
+        .get('http://localhost:3000/orders')
+        .then(response => (this.orders = response.data))
+        .then(() => {
+          for (const order of this.orders) {
+            order['menuVisibility'] = false;
+          }
+        });
+    },
+
+    async getDeliveries() {
+      axios
+        .get('http://localhost:3000/deliveries')
+        .then(response => (this.deliveries = response.data))
+        .then(() => {
+          for (const delivery of this.deliveries) {
+            delivery['menuVisibility'] = false;
+          }
+        });
+    },
+
+    removeMenus() {
+      for (const order of this.orders) {
+        order['menuVisibility'] = false;
+      }
+      for (const delivery of this.deliveries) {
+        delivery['menuVisibility'] = false;
+      }
+    },
+
+    showMore(element) {
+      this.openModal = true;
+      this.element = element;
+    },
+
+    async orderToDelivery(element) {
+      axios
+      .get('http://localhost:3000/deliveries/'+element.id)
+      .then(
+          () => {
+              console.log('Эта отгрузка уже существует') 
+          },
+          async () => {
+              let date = new Date();
+              let day = date.getDate().toString();
+              if (day.length < 2) {
+                  day = '0' + day;
+              }
+              let month = (date.getMonth() + 1).toString();
+              if (month.length < 2) {
+                  month = '0' + month;
+              }
+              let year = date.getFullYear().toString();
+              const requestBody = JSON.stringify({
+                  id: element.id,
+                  cost: element.cost,
+                  order: element.id,
+                  date: day+'.'+month+'.'+year,
+                  menuVisibility: false,
+                  products: element.products,
+              });
+              const config = {
+                  headers: {
+                      'Content-Type': 'application/json',
+                  }
+              };
+              const result = await axios.post('http://localhost:3000/deliveries', requestBody, config);
+              console.log(result);
+              this.getOrders();
+              this.getDeliveries();
+          },
+      );
+    },
+
+    async deleteElement(element) {
+      if (element.order) {
+          const result = await axios.delete('http://localhost:3000/deliveries/'+element.id);
+          console.log(result);
+      } else {
+          const result = await axios.delete('http://localhost:3000/orders/'+element.id);
+          console.log(result);
+      }
+      this.getOrders();
+      this.getDeliveries();
+    },
   },
   mounted() {
-    this.getData();
+    this.getOrders();
+    this.getDeliveries();
+    document.documentElement.setAttribute('theme', 'light');
+    window.addEventListener("keydown", (event) => {
+      if (this.openModal && event.key == "Escape") {
+        this.openModal = false; 
+      }
+    });
   }
 };
 </script>
 <style lang="scss">
   @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+  html[theme='light'] {
+    $mainColor: white;
+    $secondColor: black;
+
+    body {
+    background-color: $mainColor;
+    color: $secondColor;
+    border-color: $secondColor;
+
+      button {
+        background-color: $mainColor;
+        color: $secondColor;
+        border-color: $secondColor;
+        cursor: pointer;
+      }
+    }
+  }
+
+  html[theme='dark'] {
+    $mainColor: black;
+    $secondColor: white;
+
+    body {
+      background-color: $mainColor;
+      border-color: $secondColor;
+      color: $secondColor;
+
+      button {
+        background-color: $mainColor;
+        border-color: $secondColor;
+        color: $secondColor;
+      }
+    }
+  }
+
+  html {
+    margin: 0;
+
+    button {
+      cursor: pointer;
+    }
+  }
 
   #app {
     font-family: 'Inter', sans-serif;
@@ -67,14 +219,41 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     width: 1300px;
+    height: 580px;
+    margin-top: 10px;
 
     .orders, .deliveries {
+      position: relative;
       width: 49%;
-      border: 2px solid black;
+      border: 3px solid;
+      overflow-y: scroll;
 
       h2 {
         text-align: center;
       }
+
+      button {
+        height: 40px;
+        width: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 3px solid; 
+      }
+
+      .refresher {
+        top: 10px;
+        position: absolute;
+        background-color: white;
+      }
+    }
+
+    .orders button {
+      right: 10px;
+    }
+
+    .deliveries button {
+      left: 10px;
     }
 
     .list {
