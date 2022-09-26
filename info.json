@@ -38,7 +38,27 @@
       "id": 123,
       "cost": 12345,
       "order": 123,
-      "date": "10.06.2022",
+      "date": "26.09.2022",
+      "menuVisibility": false,
+      "products": [
+        {
+          "name": "Товар первый",
+          "number": 1,
+          "price": 12123
+        },
+        {
+          "name": "Товар второй",
+          "number": 3,
+          "price": 22123
+        }
+      ]
+    },
+    {
+      "id": 124,
+      "cost": 12345,
+      "order": 124,
+      "date": "26.09.2022",
+      "menuVisibility": false,
       "products": [
         {
           "name": "Товар первый",

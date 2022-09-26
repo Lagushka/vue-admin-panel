@@ -68,7 +68,7 @@
         align-items: center;
 
         .info-window {
-        width: 30%;
+        width: 500px;
         border: 3px solid;
         position: relative;
         padding: 0 20px 0 20px;
@@ -82,6 +82,7 @@
                 right: 20px;
                 top: 20px;
                 background-color: white;
+                border: 3px solid;
             }
 
             .section-heading {

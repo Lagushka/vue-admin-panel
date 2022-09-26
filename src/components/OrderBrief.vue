@@ -16,7 +16,7 @@
                 <span v-if="delivery">
                     {{element.date}}
                 </span>
-                <button @click.stop="changeValue">
+                <button @click.stop="$emit('changeVisibility', element)">
                     <img src="../assets/more.svg" alt="" width="35">
                 </button>
             </div>
@@ -38,11 +38,6 @@
 <script>
     export default {
         props: ['element', 'delivery'],
-        methods: {
-            changeValue() {
-                this.$emit('changeVisibility');
-            }
-        }
     }
 </script>
 
@@ -88,7 +83,7 @@
         .menu {
             display: flex;
             position: absolute;
-            z-index: 1;
+            z-index: 2;
             flex-direction: column;
             right: 0;
             top: 70px;

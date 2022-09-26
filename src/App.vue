@@ -12,7 +12,7 @@
             <Order 
               :element="order" 
               :delivery="false" 
-              @changeVisibility="order.menuVisibility = !order.menuVisibility" 
+              @changeVisibility="changeVisibility" 
               @showInfo="showMore"
               @toDelivery="orderToDelivery" 
               @removeElement="deleteElement"
@@ -30,13 +30,14 @@
             <Order 
               :element="delivery" 
               :delivery="true"
-              @changeVisibility="delivery.menuVisibility = !delivery.menuVisibility"
+              @changeVisibility="changeVisibility"
               @removeElement="deleteElement"
             />
           </li>
         </ul>
       </div>
     </main>
+    <PageFooter />
     <ModalWindow :element="element" v-if="openModal" @click="openModal = false" @closeModal="openModal = false" @toDelivery="orderToDelivery" @delete="deleteElement" />
   </div>
 </template>
@@ -46,6 +47,7 @@ import PageHeader from "./components/PageHeader.vue";
 import Order from "./components/OrderBrief.vue";
 import axios from 'axios';
 import ModalWindow from './components/ModalWindow.vue';
+import PageFooter from "./components/PageFooter.vue";
 
 export default {
   data() {
@@ -59,7 +61,8 @@ export default {
   components: {
     PageHeader,
     Order,
-    ModalWindow
+    ModalWindow,
+    PageFooter,
 },
   methods: {
     async getOrders() {
@@ -84,13 +87,41 @@ export default {
         });
     },
 
-    removeMenus() {
-      for (const order of this.orders) {
-        order['menuVisibility'] = false;
+    removeMenus(element) {
+      if (element) {
+        if (element.order) {
+          console.log('hello');
+          for (const order of this.orders) {
+            order['menuVisibility'] = false;
+          }
+          for (const delivery of this.deliveries) {
+            if (delivery.id != element.id) {
+              delivery['menuVisibility'] = false;
+            }
+          }
+        } else {
+          for (const order of this.orders) {
+            if (order.id != element.id) {
+              order.menuVisibility = false;
+            }
+          }
+          for (const delivery of this.deliveries) {
+            delivery.menuVisibility = false;
+          }
+        }
+      } else {
+        for (const order of this.orders) {
+          order['menuVisibility'] = false;
+        }
+        for (const delivery of this.deliveries) {
+          delivery['menuVisibility'] = false;
+        }
       }
-      for (const delivery of this.deliveries) {
-        delivery['menuVisibility'] = false;
-      }
+    },
+
+    changeVisibility(element) {
+      this.removeMenus(element);
+      element.menuVisibility = !element.menuVisibility;
     },
 
     showMore(element) {
@@ -202,6 +233,11 @@ export default {
   html {
     margin: 0;
 
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
     button {
       cursor: pointer;
     }
@@ -212,21 +248,38 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 1300px;
   }
 
   main {
+    z-index: 0;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 1300px;
+    width: 100%;
+    box-sizing: border-box;
     height: 580px;
     margin-top: 10px;
 
+    @media (max-width: 1300px) {
+      height: fit-content;
+      flex-direction: column;
+
+      .deliveries {
+        margin-top: 10px;
+      }
+    }
+
     .orders, .deliveries {
       position: relative;
+      box-sizing: border-box;
       width: 49%;
       border: 3px solid;
-      overflow-y: scroll;
+
+      @media (max-width: 1300px) {
+        width: 100%;
+      }
 
       h2 {
         text-align: center;
@@ -254,6 +307,11 @@ export default {
 
     .deliveries button {
       left: 10px;
+
+      @media (max-width: 1300px) {
+        left: auto;
+        right: 10px;
+      }
     }
 
     .list {
